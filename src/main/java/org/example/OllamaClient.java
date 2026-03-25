@@ -1,9 +1,11 @@
 package org.example;
+
 import okhttp3.*;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class OllamaClient {
@@ -11,7 +13,7 @@ public class OllamaClient {
     private static final String URL = "http://localhost:11434/api/embed";
     private static final OkHttpClient CLIENT = new OkHttpClient();
 
-    private OllamaClient() {} // prevent instantiation
+    private OllamaClient() {}
 
     public static List<double[]> getEmbeddings(String model, List<String> inputs) {
 
@@ -30,12 +32,7 @@ public class OllamaClient {
                     ))
                     .build();
 
-            long start = System.currentTimeMillis();
-
             Response response = CLIENT.newCall(request).execute();
-
-            long end = System.currentTimeMillis();
-            System.out.println("⏱ Model: " + model + " | Time: " + (end - start) + " ms");
 
             if (!response.isSuccessful()) {
                 throw new RuntimeException("API call failed: " + response);
@@ -63,5 +60,18 @@ public class OllamaClient {
         }
 
         return result;
+    }
+
+    // 🔹 Single embedding with time
+    public static EmbeddingResult getSingleEmbedding(String model, String input) {
+
+        long start = System.currentTimeMillis();
+
+        List<double[]> result =
+                getEmbeddings(model, Collections.singletonList(input));
+
+        long end = System.currentTimeMillis();
+
+        return new EmbeddingResult(result.get(0), (end - start));
     }
 }
